@@ -4,25 +4,28 @@ A complete Docker stack for Raspberry Pi Zero 2 W including web server, ad block
 
 ## Services
 
-All services include healthchecks: `docker compose ps` shows their status as `healthy` or `unhealthy`.
+These are the services suggested, feel free to do as you will.
 
-- **NGINX**: Web server on port 80 (healthcheck: HTTP via `wget`)
-- **Unbound**: Recursive DNS resolver (healthcheck: DNS resolution via `drill-hc` — Pi-hole won't start until Unbound is ready)
-- **Pi-hole**: Network-wide ad blocking (built-in healthcheck: DNS query via `dig`)
-- **Tailscale**: Mesh VPN (healthcheck: HTTP via `wget` on the built-in `/healthz` endpoint)
-- **FileBrowser**: File manager on port 8080 (healthcheck: HTTP via `wget` on `/health`)
+
 - **Portainer**: Docker container management UI (healthcheck: HTTPS via `wget`)
+- **NGINX**: Web server on port 80 (healthcheck: HTTP via `wget`)
+- **FileBrowser**: File manager on port 8080 (healthcheck: HTTP via `wget` on `/health`)
+- **Pi-hole**: Network-wide ad blocking (built-in healthcheck: DNS query via `dig`)
+- **Unbound**: Recursive DNS resolver (healthcheck: DNS resolution via `drill-hc` — Pi-hole won't start until Unbound is ready)
+- **Tailscale**: Mesh VPN (healthcheck: HTTP via `wget` on the built-in `/healthz` endpoint)
 - **Watchtower**: Automatic container updates (healthcheck: built-in `--health-check` flag)
+
+All services include healthchecks: `docker compose ps` shows their status as `healthy` or `unhealthy`.
 
 ## Prerequisites
 
 ### Hardware
 - Raspberry Pi Zero 2 W
-- MicroSD card (16 GB or larger recommended)
+- MicroSD card (16 GB  at least)
 - Power supply and network connection (ethernet if possible)
 
 ### Software
-- Raspberry Pi OS Lite recommended
+- Raspberry Pi OS Lite (recommended)
 - Git installed (`sudo apt-get update && sudo apt-get install -y git`)
 
 ### Network
@@ -58,8 +61,8 @@ Set the following:
 | Variable | Description |
 |----------|-------------|
 | `PIHOLE_WEBPASSWORD` | Choose a password for the Pi-hole admin panel |
-| `PIHOLE_TZ` | Your timezone (e.g. `Europe/Rome`, `America/New_York`) |
-| `TS_AUTH_KEY` | Your Tailscale auth key (leave blank to skip) |
+| `PIHOLE_TZ` | Your timezone |
+| `TS_AUTH_KEY` | Your Tailscale auth key |
 | `FB_USERNAME` | FileBrowser login username (default: `admin`) |
 | `FB_PASSWORD` | FileBrowser login password |
 
@@ -71,8 +74,6 @@ Set the following:
 
 **Getting a FileBrowser password:**
 Set `FB_USERNAME` and `FB_PASSWORD` to your preferred login credentials.
-
-Save and exit (`Ctrl+X`, then `Y`, then `Enter`).
 
 ### Step 4: Install Docker
 
@@ -86,7 +87,7 @@ This will:
 - Install Docker and Docker Compose
 - Add your user to the `docker` group
 
-**Important**: After the script finishes, **log out and log back in** (or restart SSH) so the Docker group permission takes effect. If you skip this, `docker compose` commands will fail with a permission error.
+>**Important**: After the script finishes, **log out and log back in** (or restart SSH) so the Docker group permission takes effect.
 
 ### Step 5: Start the services
 
@@ -151,7 +152,6 @@ If the Pi feels slow or containers crash:
 
 - Check memory: `free -h`
 - If Watchtower isn't needed, stop it: `docker compose stop watchtower`
-- FileBrowser adds ~30 MB — stop it if not needed: `docker compose stop filebrowser`
 - Consider disabling services you don't use
 
 ## Default Ports
@@ -173,7 +173,7 @@ If the Pi feels slow or containers crash:
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `PIHOLE_WEBPASSWORD` | Yes | — | Pi-hole admin password |
-| `PIHOLE_TZ` | No | `Europe/Rome` | Timezone for Pi-hole |
+| `PIHOLE_TZ` | No | `Europe/Madrid` | Timezone for Pi-hole |
 | `TS_AUTH_KEY` | No | — | Tailscale auth key (omit to skip auto-connect) |
 | `FB_USERNAME` | No | `admin` | FileBrowser login username |
 | `FB_PASSWORD` | Yes | — | FileBrowser login password |
@@ -274,7 +274,7 @@ sudo systemctl disable systemd-resolved
 
 ### Container exits immediately / OOM
 
-The Pi Zero 2W has 512 MB RAM. Check memory usage:
+RAM issue. Check memory usage:
 
 ```bash
 free -h
@@ -329,6 +329,7 @@ docker compose run --rm -v portainer_data:/data -v $(pwd):/backup alpine tar -cz
 Based on [mineraleyt/pi2w-docker](https://github.com/mineraleyt/pi2w-docker).
 
 **Changes made:**
-- Added **Unbound** (recursive DNS resolver), **Tailscale** (mesh VPN), **FileBrowser** (file manager)
+- Removed **MariaDB** and **phpMyAdmin**
+- Added **Unbound** **Tailscale** and **FileBrowser**
 - Switched NGINX to `stable-alpine-slim` for a smaller footprint
-- Removed MariaDB and phpMyAdmin (not needed for this stack)
+

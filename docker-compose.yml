@@ -37,7 +37,7 @@ services:
     image: pihole/pihole:latest
     container_name: pihole
     environment:
-      TZ: ${PIHOLE_TZ:-Europe/Rome}
+      TZ: ${PIHOLE_TZ:-Europe/Madrid}
       WEBPASSWORD: ${PIHOLE_WEBPASSWORD}
       PIHOLE_DNS_1: 172.20.0.2#53
       PIHOLE_DNS_2: 172.20.0.2#53
