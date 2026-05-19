@@ -4,12 +4,14 @@ A complete Docker stack for Raspberry Pi Zero 2 W including web server, ad block
 
 ## Services
 
-- **NGINX**: Web server on port 80
-- **Unbound**: Recursive DNS resolver (upstream for Pi-hole). Includes a healthcheck that verifies DNS resolution via `drill-hc` — Pi-hole won't start until Unbound is ready
-- **Pi-hole**: Network-wide ad blocking (uses Unbound for DNS)
-- **Tailscale**: Mesh VPN
-- **Portainer**: Docker container management UI
-- **Watchtower**: Automatic container updates
+All services include healthchecks — `docker compose ps` shows their status as `healthy` or `unhealthy`.
+
+- **NGINX**: Web server on port 80 (healthcheck: HTTP via `wget`)
+- **Unbound**: Recursive DNS resolver (healthcheck: DNS resolution via `drill-hc` — Pi-hole won't start until Unbound is ready)
+- **Pi-hole**: Network-wide ad blocking (built-in healthcheck: DNS query via `dig`)
+- **Tailscale**: Mesh VPN (healthcheck: HTTP via `wget` on the built-in `/healthz` endpoint)
+- **Portainer**: Docker container management UI (healthcheck: HTTPS via `wget`)
+- **Watchtower**: Automatic container updates (healthcheck: built-in `--health-check` flag)
 
 ## Prerequisites
 
