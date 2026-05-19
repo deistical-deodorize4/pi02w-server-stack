@@ -9,8 +9,7 @@ A complete Docker stack for Raspberry Pi Zero 2 W including web server, ad block
 - **Pi-hole**: Network-wide ad blocking (uses Unbound for DNS)
 - **Tailscale**: Mesh VPN
 - **Portainer**: Docker container management UI
-- **Watchtower**: Automatic container updates (daily at 4 AM)
-
+- **Watchtower**: Automatic container updates
 ## Prerequisites
 
 ### Hardware
