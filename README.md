@@ -4,7 +4,7 @@ A complete Docker stack for Raspberry Pi Zero 2 W including web server, ad block
 
 ## Services
 
-All services include healthchecks — `docker compose ps` shows their status as `healthy` or `unhealthy`.
+All services include healthchecks: `docker compose ps` shows their status as `healthy` or `unhealthy`.
 
 - **NGINX**: Web server on port 80 (healthcheck: HTTP via `wget`)
 - **Unbound**: Recursive DNS resolver (healthcheck: DNS resolution via `drill-hc` — Pi-hole won't start until Unbound is ready)
@@ -18,27 +18,23 @@ All services include healthchecks — `docker compose ps` shows their status as 
 ### Hardware
 - Raspberry Pi Zero 2 W
 - MicroSD card (16 GB or larger recommended)
-- Power supply and network connection (WiFi or ethernet)
+- Power supply and network connection (ethernet if possible)
 
 ### Software
-- 64-bit OS installed (Debian or Raspberry Pi OS)
-- SSH access to the Pi
+- Raspberry Pi OS Lite recommended
 - Git installed (`sudo apt-get update && sudo apt-get install -y git`)
 
 ### Network
-- Your Pi needs a **static IP address** on your network (or a DHCP reservation from your router). You'll need this IP to access the web interfaces and configure DNS.
+- Your Pi needs a static IP address on your network. You'll need this IP to access the web interfaces and configure DNS.
 
 ## Quick Start
 
 ### Step 1: Find your Pi's IP
 
-Run this on the Pi to see its IP address:
-
 ```bash
 hostname -I
 ```
 
-Make a note of it — you'll use it to access Portainer, Pi-hole, and other services. If you want a static IP, configure it in your router's DHCP reservation settings.
 
 ### Step 2: Get the files
 
@@ -70,7 +66,6 @@ Set the following:
 3. Make sure **Reusable** is checked if you want to reuse it
 4. Copy the key and paste it as the value for `TS_AUTH_KEY`
 
-Save and exit (`Ctrl+X`, then `Y`, then `Enter`).
 
 ### Step 4: Install Docker
 
@@ -98,13 +93,11 @@ Check everything is running:
 docker compose ps
 ```
 
-All services should show `Up` in the status column.
-
 ## Post-Deployment Setup
 
 ### Check Portainer (first-time setup)
 
-Open `http://[YOUR-PI-IP]:9000` in your browser. You'll be prompted to:
+Open `http://[YOUR-PI-IP]:9000` in your browser.
 1. Create an admin user (username and password)
 2. Select **Docker** as the environment type
 3. Connect to the local Docker socket
@@ -120,7 +113,6 @@ To verify Unbound is working as the upstream DNS resolver:
 2. Under **Upstream DNS Servers**, you should see `172.20.0.2#53` (custom)
 3. Go to **Tools > Ping** and ping `google.com` — it should resolve
 
-To view Pi-hole query statistics, check the dashboard at `http://[YOUR-PI-IP]:8081/admin`.
 
 ### Configure Tailscale
 
@@ -148,7 +140,7 @@ Pi-hole listens on **port 5353** (not the default port 53). To use it:
 
 ## RAM Usage Note
 
-The Pi Zero 2 W has **512 MB RAM**. After the OS boots, ~200-300 MB is used, leaving ~200-300 MB for containers. If the Pi feels slow or containers crash:
+If the Pi feels slow or containers crash:
 
 - Check memory: `free -h`
 - If Watchtower isn't needed, stop it: `docker compose stop watchtower`
@@ -163,7 +155,7 @@ The Pi Zero 2 W has **512 MB RAM**. After the OS boots, ~200-300 MB is used, lea
 | Pi-hole | `8081` | Admin web interface |
 | Portainer | `9000` | Management UI |
 
-> Pi-hole's DNS is on port 5353 instead of 53 to avoid conflicts with systemd-resolved. Pi-hole uses Unbound (172.20.0.2) as its upstream resolver for fully self-contained DNS — no Google, Cloudflare, or ISP dependency.
+> Pi-hole's DNS is on port 5353 instead of 53 to avoid conflicts with systemd-resolved. Pi-hole uses Unbound (172.20.0.2) as its upstream resolver for fully self-contained DNS
 
 ## Configuration
 
@@ -213,11 +205,10 @@ docker compose logs -f
 docker compose logs -f unbound
 ```
 
-Press `Ctrl+C` to stop following logs.
 
 ### Updating containers
 
-Watchtower automatically updates all containers daily at 4 AM.
+Watchtower automatically updates all containers daily at 4:00 AM.
 
 For manual updates:
 
