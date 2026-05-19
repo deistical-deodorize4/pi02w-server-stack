@@ -28,11 +28,11 @@ All services include healthchecks: `docker compose ps` shows their status as `he
 - Raspberry Pi OS Lite (recommended)
 - Git installed
 ```bash
-sudo apt install git
+sudo apt update && sudo apt install -y git
 ``` 
 
 ### Network
-- Your Pi needs a static IP address on your network. You'll need this IP to access the web interfaces and configure DNS.
+- Your Pi needs a static IP address. You'll need this IP to access the web interfaces and configure DNS.
 
 ## Quick Start
 
@@ -73,7 +73,6 @@ Set the following:
 1. Go to https://login.tailscale.com/admin/settings/keys
 2. Click **Generate auth key**
 3. Make sure **Reusable** is checked if you want to reuse it
-4. Copy the key and paste it as the value for `TS_AUTH_KEY`
 
 
 ### Step 4: Install Docker
@@ -149,13 +148,6 @@ Pi-hole listens on **port 5354** (not the default port 53). To use it:
 
 **On your router (for whole network)**: Set the DNS server to `[YOUR-PI-IP]:5354` in the router's DHCP/DNS settings. Most routers allow custom DNS but not all support a custom port — if yours doesn't, you'll need to configure each device individually.
 
-## RAM Usage Note
-
-If the Pi feels slow or containers crash:
-
-- Check memory: `free -h`
-- If Watchtower isn't needed, stop it: `docker compose stop watchtower`
-- Consider disabling services you don't use
 
 ## Default Ports
 
@@ -233,14 +225,13 @@ docker compose pull
 docker compose up -d
 ```
 
-## Web Interfaces
+## RAM Usage Note
 
-| Interface | URL | Notes |
-|-----------|-----|-------|
-| NGINX | `http://[YOUR-PI-IP]` | Default web page |
-| Portainer | `http://[YOUR-PI-IP]:9000` | Create admin account on first visit |
-| Pi-hole | `http://[YOUR-PI-IP]:8081/admin` | Login with `PIHOLE_WEBPASSWORD` |
-| FileBrowser | `http://[YOUR-PI-IP]:8080` | Login with `FB_USERNAME` / `FB_PASSWORD` |
+If the Pi feels slow or containers crash:
+
+- Check memory: `free -h`
+- If Watchtower isn't needed, stop it: `docker compose stop watchtower`
+- Consider disabling services you don't use
 
 ## Troubleshooting
 
@@ -264,7 +255,6 @@ Or just log out and back in.
 ## Security Considerations
 
 1. Change all default passwords in `.env`
-2. Use strong, unique passwords
 3. Portainer and Pi-hole use HTTP by default — consider a reverse proxy with HTTPS
 4. Keep your system updated: `sudo apt-get update && sudo apt-get upgrade`
 5. **Watchtower** has access to the Docker socket, giving it full control over all containers. This is normal for auto-update tools but means a compromise of the Watchtower container would compromise the whole host. Disable it if you don't need it: `docker compose stop watchtower`
@@ -289,8 +279,8 @@ docker compose run --rm -v portainer_data:/data -v $(pwd):/backup alpine tar -cz
 
 Based on [mineraleyt/pi2w-docker](https://github.com/mineraleyt/pi2w-docker).
 
-**Changes made:**
+Changes made:
 - Removed **MariaDB** and **phpMyAdmin**
 - Added **Unbound** **Tailscale** and **FileBrowser**
-- Switched NGINX to `stable-alpine-slim` for a smaller footprint
+- Switched **NGINX** to `stable-alpine-slim` for a smaller footprint
 
