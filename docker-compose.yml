@@ -45,8 +45,8 @@ services:
       - './pihole/etc-pihole:/etc/pihole'
       - './pihole/etc-dnsmasq.d:/etc/dnsmasq.d'
     ports:
-      - "5353:53/tcp"
-      - "5353:53/udp"
+      - "5354:53/tcp"
+      - "5354:53/udp"
       - "8081:80/tcp"
     restart: unless-stopped
     cap_add:

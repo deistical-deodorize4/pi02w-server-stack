@@ -26,7 +26,10 @@ All services include healthchecks: `docker compose ps` shows their status as `he
 
 ### Software
 - Raspberry Pi OS Lite (recommended)
-- Git installed (`sudo apt-get update && sudo apt-get install -y git`)
+- Git installed
+```bash
+sudo apt install git
+``` 
 
 ### Network
 - Your Pi needs a static IP address on your network. You'll need this IP to access the web interfaces and configure DNS.
@@ -72,8 +75,6 @@ Set the following:
 3. Make sure **Reusable** is checked if you want to reuse it
 4. Copy the key and paste it as the value for `TS_AUTH_KEY`
 
-**Getting a FileBrowser password:**
-Set `FB_USERNAME` and `FB_PASSWORD` to your preferred login credentials.
 
 ### Step 4: Install Docker
 
@@ -87,7 +88,9 @@ This will:
 - Install Docker and Docker Compose
 - Add your user to the `docker` group
 
->**Important**: After the script finishes, **log out and log back in** (or restart SSH) so the Docker group permission takes effect.
+> **⚠️ Important**<br>
+After the script finishes, **log out and log back in** (restart SSH) so the Docker group permission takes effect.
+
 
 ### Step 5: Start the services
 
@@ -140,11 +143,11 @@ docker compose exec tailscale tailscale login
 
 ### Configure devices to use Pi-hole for ad blocking
 
-Pi-hole listens on **port 5353** (not the default port 53). To use it:
+Pi-hole listens on **port 5354** (not the default port 53). To use it:
 
-**On a single device**: Set the DNS server to `[YOUR-PI-IP]:5353` in the device's network settings.
+**On a single device**: Set the DNS server to `[YOUR-PI-IP]:5354` in the device's network settings.
 
-**On your router (for whole network)**: Set the DNS server to `[YOUR-PI-IP]:5353` in the router's DHCP/DNS settings. Most routers allow custom DNS but not all support a custom port — if yours doesn't, you'll need to configure each device individually.
+**On your router (for whole network)**: Set the DNS server to `[YOUR-PI-IP]:5354` in the router's DHCP/DNS settings. Most routers allow custom DNS but not all support a custom port — if yours doesn't, you'll need to configure each device individually.
 
 ## RAM Usage Note
 
@@ -159,12 +162,12 @@ If the Pi feels slow or containers crash:
 | Service | Port | Purpose |
 |---------|------|---------|
 | NGINX | `80` | Web server |
-| Pi-hole | `5353` | DNS (mapped from container port 53) |
+| Pi-hole | `5354` | DNS (mapped from container port 53) |
 | Pi-hole | `8081` | Admin web interface |
 | Portainer | `9000` | Management UI |
 | FileBrowser | `8080` | File manager |
 
-> Pi-hole's DNS is on port 5353 instead of 53 to avoid conflicts with systemd-resolved. Pi-hole uses Unbound (172.20.0.2) as its upstream resolver for fully self-contained DNS
+> Pi-hole's DNS is on port 5354 instead of 53 to avoid conflicts with systemd-resolved. Pi-hole uses Unbound (172.20.0.2) as its upstream resolver for fully self-contained DNS
 
 ## Configuration
 
@@ -251,54 +254,12 @@ exec newgrp docker
 
 Or just log out and back in.
 
-### Pi-hole won't start / port 5353 in use
-
-Check what's listening on port 5353:
-
-```bash
-sudo lsof -i :5353
-```
-
-Also check port 53 inside the container isn't conflicting with systemd-resolved:
-
-```bash
-sudo lsof -i :53
-```
-
-If systemd-resolved is using port 53 (inside the Docker bridge), you may need to disable it:
-
-```bash
-sudo systemctl stop systemd-resolved
-sudo systemctl disable systemd-resolved
-```
-
-### Container exits immediately / OOM
-
-RAM issue. Check memory usage:
-
-```bash
-free -h
-docker compose logs [service-name]
-```
-
-If a container is killed by OOM, you'll see "Killed" or exit code 137 in the logs. Try stopping unused services (e.g. `watchtower`, `nginx`) to free memory.
-
-### Tailscale not connecting
-
-Check the logs:
-
-```bash
-docker compose logs tailscale
-```
-
-Make sure the auth key is valid and not expired. Generate a new one at https://login.tailscale.com/admin/settings/keys.
-
 ### Pi-hole not blocking ads
 
 1. Check Pi-hole's DNS settings: `http://[YOUR-PI-IP]:8081/admin/settings.php?tab=dns`
 2. Upstream should be `172.20.0.2#53` (Unbound)
 3. Check the query log: `http://[YOUR-PI-IP]:8081/admin/query_log.php`
-4. Ensure your device is using `[YOUR-PI-IP]:5353` as its DNS server
+4. Ensure your device is using `[YOUR-PI-IP]:5354` as its DNS server
 
 ## Security Considerations
 
