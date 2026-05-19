@@ -5,7 +5,7 @@ A complete Docker stack for Raspberry Pi Zero 2 W including web server, ad block
 ## Services
 
 - **NGINX**: Web server on port 80
-- **Unbound**: Recursive DNS resolver (upstream for Pi-hole)
+- **Unbound**: Recursive DNS resolver (upstream for Pi-hole). Includes a healthcheck that verifies DNS resolution via `drill-hc` — Pi-hole won't start until Unbound is ready
 - **Pi-hole**: Network-wide ad blocking (uses Unbound for DNS)
 - **Tailscale**: Mesh VPN
 - **Portainer**: Docker container management UI
@@ -47,12 +47,10 @@ git clone https://github.com/deistical-deodorize4/pi02w-server-stack.git
 cd pi02w-server-stack
 ```
 
-(If not using git, copy the files to the Pi via SCP or USB.)
-
 ### Step 3: Configure environment variables
 
 ```bash
-cp .env.example .env
+cp .env.default .env
 nano .env
 ```
 

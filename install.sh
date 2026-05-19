@@ -9,14 +9,41 @@ fi
 # Check for .env file
 if [ ! -f .env ]; then
     echo "Warning: .env file not found."
-    if [ -f .env.example ]; then
-        echo "Copying .env.example to .env..."
-        cp .env.example .env
+    if [ -f .env.default ]; then
+        echo "Copying .env.default to .env..."
+        cp .env.default .env
         echo "Please edit .env with your passwords before running 'docker compose up -d'"
     else
-        echo "Error: .env.example not found either."
+        echo "Error: .env.default not found."
         exit 1
     fi
+fi
+
+# Create nginx directories and default page
+if [ ! -d nginx/html ]; then
+    echo "Creating nginx directories..."
+    mkdir -p nginx/html nginx/conf.d
+fi
+if [ ! -f nginx/html/index.html ]; then
+    cat > nginx/html/index.html << 'EOF'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pi Zero 2W Server</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 50px auto; padding: 0 20px; text-align: center; }
+        h1 { color: #333; }
+        p { color: #666; }
+    </style>
+</head>
+<body>
+    <h1>Pi Zero 2W Server</h1>
+    <p>NGINX is running. Place your site files in nginx/html.</p>
+</body>
+</html>
+EOF
 fi
 
 # Update package list and system
