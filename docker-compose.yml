@@ -115,7 +115,8 @@ services:
       FB_DATABASE: /database/filebrowser.db
       FB_USERNAME: ${FB_USERNAME:-admin}
       FB_PASSWORD: ${FB_PASSWORD}
-    command: /bin/sh -c '/filebrowser users update "$${FB_USERNAME}" --password "$${FB_PASSWORD}" 2>/dev/null || true; exec /filebrowser'
+    entrypoint: /bin/sh
+    command: -c '/filebrowser users update "$${FB_USERNAME}" --password "$${FB_PASSWORD}" 2>/dev/null || true; exec /filebrowser'
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:80/health"]
