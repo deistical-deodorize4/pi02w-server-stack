@@ -15,7 +15,6 @@ services:
       start_period: 10s
     volumes:
       - ./nginx/html:/usr/share/nginx/html
-      - ./nginx/conf.d:/etc/nginx/conf.d
 
   # Recursive DNS resolver (upstream for Pi-hole)
   unbound:

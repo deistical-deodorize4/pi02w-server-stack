@@ -22,7 +22,7 @@ fi
 # Create nginx directories and default page
 if [ ! -d nginx/html ]; then
     echo "Creating nginx directories..."
-    mkdir -p nginx/html nginx/conf.d
+    mkdir -p nginx/html
 fi
 if [ ! -f nginx/html/index.html ]; then
     cat > nginx/html/index.html << 'EOF'
