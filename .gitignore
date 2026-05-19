@@ -1,0 +1,16 @@
+# Environment files (may contain real secrets)
+.env
+.env.local
+.env.*.local
+
+# Private keys and certificates
+*.pem
+*.key
+*.pfx
+*.p12
+id_rsa
+id_rsa.pub
+
+# Credential files
+credentials
+.secret*
