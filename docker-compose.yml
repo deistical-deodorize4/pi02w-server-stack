@@ -1,0 +1,94 @@
+---
+services:
+  # Web server
+  nginx:
+    image: nginx:stable-alpine-slim
+    container_name: nginx-server
+    ports:
+      - "80:80"
+    restart: unless-stopped
+    volumes:
+      - ./nginx/html:/usr/share/nginx/html
+      - ./nginx/conf.d:/etc/nginx/conf.d
+
+  # Recursive DNS resolver (upstream for Pi-hole)
+  unbound:
+    image: klutchell/unbound:latest
+    container_name: unbound
+    restart: unless-stopped
+    networks:
+      dns:
+        ipv4_address: 172.20.0.2
+
+  # Network-wide ad blocking
+  pihole:
+    image: pihole/pihole:latest
+    container_name: pihole
+    environment:
+      TZ: ${PIHOLE_TZ:-Europe/Rome}
+      WEBPASSWORD: ${PIHOLE_WEBPASSWORD}
+      PIHOLE_DNS_1: 172.20.0.2#53
+      PIHOLE_DNS_2: 172.20.0.2#53
+    volumes:
+      - './pihole/etc-pihole:/etc/pihole'
+      - './pihole/etc-dnsmasq.d:/etc/dnsmasq.d'
+    ports:
+      - "5353:53/tcp"
+      - "5353:53/udp"
+      - "8081:80/tcp"
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    networks:
+      dns:
+        ipv4_address: 172.20.0.3
+    depends_on:
+      - unbound
+
+  # Mesh VPN
+  tailscale:
+    image: tailscale/tailscale:latest
+    container_name: tailscale
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      TS_AUTH_KEY: ${TS_AUTH_KEY:-}
+      TS_STATE_DIR: /var/lib/tailscale
+      TS_USERSPACE: "false"
+    volumes:
+      - ./tailscale:/var/lib/tailscale
+      - /dev/net/tun:/dev/net/tun
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+
+  # Docker management
+  portainer:
+    image: portainer/portainer-ce:linux-arm64
+    container_name: portainer
+    ports:
+      - "9000:9000"
+      - "8000:8000"
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+
+  # Automatic container updates
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --schedule "0 0 4 * * *" --cleanup
+    restart: unless-stopped
+
+volumes:
+  portainer_data:
+
+networks:
+  dns:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
