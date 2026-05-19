@@ -315,3 +315,12 @@ Tailscale state is in `./tailscale` and Portainer data is in the `portainer_data
 ```bash
 docker compose run --rm -v portainer_data:/data -v $(pwd):/backup alpine tar -czf /backup/portainer-backup.tar.gz /data
 ```
+
+## Credits
+
+Based on [mineraleyt/pi2w-docker](https://github.com/mineraleyt/pi2w-docker).
+
+**Changes made:**
+- Added **Unbound** (recursive DNS resolver) and **Tailscale** (mesh VPN)
+- Switched NGINX to `stable-alpine-slim` for a smaller footprint
+- Removed MariaDB and phpMyAdmin (not needed for this stack)
