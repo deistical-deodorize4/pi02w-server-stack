@@ -1,5 +1,11 @@
 #!/bin/bash
 
+if [ "$EUID" -eq 0 ]; then
+    echo "Error: Do not run this script as root or with sudo."
+    echo "It will use sudo internally where needed."
+    exit 1
+fi
+
 # Check for .env file
 if [ ! -f .env ]; then
     echo "Warning: .env file not found."

@@ -10,6 +10,7 @@ A complete Docker stack for Raspberry Pi Zero 2 W including web server, ad block
 - **Tailscale**: Mesh VPN
 - **Portainer**: Docker container management UI
 - **Watchtower**: Automatic container updates
+
 ## Prerequisites
 
 ### Hardware
@@ -42,8 +43,8 @@ Make a note of it — you'll use it to access Portainer, Pi-hole, and other serv
 On the Pi:
 
 ```bash
-git clone https://github.com/mineraleyt/pi2w-docker.git
-cd pi2w-docker
+git clone https://github.com/deistical-deodorize4/pi02w-server-stack.git
+cd pi02w-server-stack
 ```
 
 (If not using git, copy the files to the Pi via SCP or USB.)
@@ -300,7 +301,9 @@ Make sure the auth key is valid and not expired. Generate a new one at https://l
 2. Use strong, unique passwords
 3. Portainer and Pi-hole use HTTP by default — consider a reverse proxy with HTTPS
 4. Keep your system updated: `sudo apt-get update && sudo apt-get upgrade`
-5. Watchtower updates containers automatically — be aware that updates could break things
+5. **Watchtower** has access to the Docker socket, giving it full control over all containers. This is normal for auto-update tools but means a compromise of the Watchtower container would compromise the whole host. Disable it if you don't need it: `docker compose stop watchtower`
+6. **Watchtower** updates containers automatically — be aware that updates could break things. Pin specific image tags in `docker-compose.yml` if you need stability
+7. **Tailscale** is more secure than opening ports to the internet — no exposed ports needed on your router. Your Pi is only accessible to devices in your Tailscale network
 
 ## Backup
 
