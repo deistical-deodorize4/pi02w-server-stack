@@ -11,6 +11,10 @@
 id_rsa
 id_rsa.pub
 
+# FileBrowser runtime data
+files/
+filebrowser/
+
 # Credential files
 credentials
 .secret*

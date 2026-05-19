@@ -46,6 +46,9 @@ if [ ! -f nginx/html/index.html ]; then
 EOF
 fi
 
+# Create filebrowser directories
+mkdir -p files filebrowser
+
 # Update package list and system
 echo "Updating system..."
 sudo apt-get update && sudo apt-get upgrade -y
@@ -92,4 +95,5 @@ echo "Then run 'docker compose up -d' to start all services."
 IP=$(hostname -I | awk '{print $1}')
 echo "Access Portainer at http://$IP:9000"
 echo "Access Pi-hole admin at http://$IP:8081/admin"
+echo "Access FileBrowser at http://$IP:8080"
 echo "Pi-hole DNS is on port 5353 (configure devices to use $IP:5353 as DNS server)"

@@ -10,6 +10,7 @@ All services include healthchecks: `docker compose ps` shows their status as `he
 - **Unbound**: Recursive DNS resolver (healthcheck: DNS resolution via `drill-hc` — Pi-hole won't start until Unbound is ready)
 - **Pi-hole**: Network-wide ad blocking (built-in healthcheck: DNS query via `dig`)
 - **Tailscale**: Mesh VPN (healthcheck: HTTP via `wget` on the built-in `/healthz` endpoint)
+- **FileBrowser**: File manager on port 8080 (healthcheck: HTTP via `wget` on `/health`)
 - **Portainer**: Docker container management UI (healthcheck: HTTPS via `wget`)
 - **Watchtower**: Automatic container updates (healthcheck: built-in `--health-check` flag)
 
@@ -59,6 +60,8 @@ Set the following:
 | `PIHOLE_WEBPASSWORD` | Choose a password for the Pi-hole admin panel |
 | `PIHOLE_TZ` | Your timezone (e.g. `Europe/Rome`, `America/New_York`) |
 | `TS_AUTH_KEY` | Your Tailscale auth key (leave blank to skip) |
+| `FB_USERNAME` | FileBrowser login username (default: `admin`) |
+| `FB_PASSWORD` | FileBrowser login password |
 
 **Getting a Tailscale auth key:**
 1. Go to https://login.tailscale.com/admin/settings/keys
@@ -66,6 +69,10 @@ Set the following:
 3. Make sure **Reusable** is checked if you want to reuse it
 4. Copy the key and paste it as the value for `TS_AUTH_KEY`
 
+**Getting a FileBrowser password:**
+Set `FB_USERNAME` and `FB_PASSWORD` to your preferred login credentials.
+
+Save and exit (`Ctrl+X`, then `Y`, then `Enter`).
 
 ### Step 4: Install Docker
 
@@ -144,6 +151,7 @@ If the Pi feels slow or containers crash:
 
 - Check memory: `free -h`
 - If Watchtower isn't needed, stop it: `docker compose stop watchtower`
+- FileBrowser adds ~30 MB — stop it if not needed: `docker compose stop filebrowser`
 - Consider disabling services you don't use
 
 ## Default Ports
@@ -154,6 +162,7 @@ If the Pi feels slow or containers crash:
 | Pi-hole | `5353` | DNS (mapped from container port 53) |
 | Pi-hole | `8081` | Admin web interface |
 | Portainer | `9000` | Management UI |
+| FileBrowser | `8080` | File manager |
 
 > Pi-hole's DNS is on port 5353 instead of 53 to avoid conflicts with systemd-resolved. Pi-hole uses Unbound (172.20.0.2) as its upstream resolver for fully self-contained DNS
 
@@ -166,6 +175,8 @@ If the Pi feels slow or containers crash:
 | `PIHOLE_WEBPASSWORD` | Yes | — | Pi-hole admin password |
 | `PIHOLE_TZ` | No | `Europe/Rome` | Timezone for Pi-hole |
 | `TS_AUTH_KEY` | No | — | Tailscale auth key (omit to skip auto-connect) |
+| `FB_USERNAME` | No | `admin` | FileBrowser login username |
+| `FB_PASSWORD` | Yes | — | FileBrowser login password |
 
 ### Service Directories
 
@@ -176,6 +187,8 @@ If the Pi feels slow or containers crash:
 | `pihole/etc-pihole` | Pi-hole data (blocklists, config, gravity) |
 | `pihole/etc-dnsmasq.d` | Pi-hole dnsmasq configuration |
 | `tailscale` | Tailscale state (auto-created) |
+| `files` | Files served by FileBrowser (put your files here) |
+| `filebrowser` | FileBrowser database |
 
 ## Usage
 
@@ -224,6 +237,7 @@ docker compose up -d
 | NGINX | `http://[YOUR-PI-IP]` | Default web page |
 | Portainer | `http://[YOUR-PI-IP]:9000` | Create admin account on first visit |
 | Pi-hole | `http://[YOUR-PI-IP]:8081/admin` | Login with `PIHOLE_WEBPASSWORD` |
+| FileBrowser | `http://[YOUR-PI-IP]:8080` | Login with `FB_USERNAME` / `FB_PASSWORD` |
 
 ## Troubleshooting
 
@@ -304,7 +318,7 @@ Pi-hole data persists in `./pihole/etc-pihole`. To back it up:
 tar -czf pihole-backup-$(date +%Y%m%d).tar.gz ./pihole
 ```
 
-Tailscale state is in `./tailscale` and Portainer data is in the `portainer_data` Docker volume. To back up Portainer:
+Tailscale state is in `./tailscale`, FileBrowser files are in `./files`, and Portainer data is in the `portainer_data` Docker volume. To back up Portainer:
 
 ```bash
 docker compose run --rm -v portainer_data:/data -v $(pwd):/backup alpine tar -czf /backup/portainer-backup.tar.gz /data
@@ -315,6 +329,6 @@ docker compose run --rm -v portainer_data:/data -v $(pwd):/backup alpine tar -cz
 Based on [mineraleyt/pi2w-docker](https://github.com/mineraleyt/pi2w-docker).
 
 **Changes made:**
-- Added **Unbound** (recursive DNS resolver) and **Tailscale** (mesh VPN)
+- Added **Unbound** (recursive DNS resolver), **Tailscale** (mesh VPN), **FileBrowser** (file manager)
 - Switched NGINX to `stable-alpine-slim` for a smaller footprint
 - Removed MariaDB and phpMyAdmin (not needed for this stack)
