@@ -74,6 +74,7 @@ This will:
 - Update system packages
 - Install Docker and Docker Compose
 - Add your user to the `docker` group
+- Set `vm.swappiness=10` to reduce SD card wear (swap lives in zram, not on disk)
 
 > **⚠️ Important**<br>
 After the script finishes, **log out and log back in** (restart SSH) so the Docker group permission takes effect.
