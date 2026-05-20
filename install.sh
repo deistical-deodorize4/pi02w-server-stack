@@ -49,9 +49,6 @@ fi
 # Create filebrowser directories
 mkdir -p files filebrowser
 
-# Create unbound custom config directory
-mkdir -p unbound/conf.d
-
 # Update package list and system
 echo "Updating system..."
 sudo apt-get update && sudo apt-get upgrade -y

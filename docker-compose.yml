@@ -16,23 +16,6 @@ services:
     volumes:
       - ./nginx/html:/usr/share/nginx/html
 
-  # Recursive DNS resolver (upstream for Pi-hole)
-  unbound:
-    image: klutchell/unbound:latest
-    container_name: unbound
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "drill-hc", "@127.0.0.1", "dnssec.works"]
-      interval: 30s
-      timeout: 30s
-      retries: 3
-      start_period: 30s
-    volumes:
-      - ./unbound/conf.d:/etc/unbound/custom.conf.d
-    networks:
-      dns:
-        ipv4_address: 172.20.0.2
-
   # Network-wide ad blocking
   pihole:
     image: pihole/pihole:latest
@@ -40,8 +23,8 @@ services:
     environment:
       TZ: ${PIHOLE_TZ:-Europe/Madrid}
       WEBPASSWORD: ${PIHOLE_WEBPASSWORD}
-      PIHOLE_DNS_1: 172.20.0.2#53
-      PIHOLE_DNS_2: 172.20.0.2#53
+      PIHOLE_DNS_1: 9.9.9.9
+      PIHOLE_DNS_2: 149.112.112.112
     volumes:
       - './pihole/etc-pihole:/etc/pihole'
       - './pihole/etc-dnsmasq.d:/etc/dnsmasq.d'
@@ -52,12 +35,6 @@ services:
     restart: unless-stopped
     cap_add:
       - NET_ADMIN
-    networks:
-      dns:
-        ipv4_address: 172.20.0.3
-    depends_on:
-      unbound:
-        condition: service_healthy
 
   # Mesh VPN
   tailscale:
@@ -144,10 +121,3 @@ services:
 
 volumes:
   portainer_data:
-
-networks:
-  dns:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/24

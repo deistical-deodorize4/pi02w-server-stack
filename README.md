@@ -10,8 +10,7 @@ These are the services suggested, feel free to do as you will.
 - **Portainer**: Docker container management UI (healthcheck: HTTPS via `wget`)
 - **NGINX**: Web server on port 80 (healthcheck: HTTP via `wget`)
 - **FileBrowser**: File manager on port 8080 (healthcheck: HTTP via `wget` on `/health`)
-- **Pi-hole**: Network-wide ad blocking (built-in healthcheck: DNS query via `dig`)
-- **Unbound**: Recursive DNS resolver (healthcheck: DNS resolution via `drill-hc` — Pi-hole won't start until Unbound is ready). Does direct root server resolution — no upstream DNS dependency, no DNSSEC validation (keeps it simple and reliable)
+- **Pi-hole**: Network-wide ad blocking (built-in healthcheck: DNS query via `dig`). Uses Quad9 (`9.9.9.9`) as upstream DNS
 - **Tailscale**: Mesh VPN (healthcheck: HTTP via `wget` on the built-in `/healthz` endpoint)
 - **Watchtower**: Automatic container updates (healthcheck: built-in `--health-check` flag)
 
@@ -108,11 +107,9 @@ This is a one-time setup. After that, you can manage all containers from the Por
 
 Open `http://[YOUR-PI-IP]:8081/admin`. Login with password set in `PIHOLE_WEBPASSWORD`.
 
-To verify Unbound is working as the upstream DNS resolver:
-1. Go to **Settings > DNS**
-2. Under **Upstream DNS Servers**, you should see `172.20.0.2#53` (custom)
-3. Go to **Tools > Search Lists** and ping `google.com` . It should resolve
-
+To verify Pi-hole is working:
+1. Check the dashboard for query statistics
+2. Go to **Tools > Ping** and ping `google.com` — it should resolve
 
 ### Configure Tailscale
 
@@ -149,7 +146,7 @@ Pi-hole listens on **port 5354** (not the default port 53). To use it:
 | Portainer | `9000` | Management UI |
 | FileBrowser | `8080` | File manager |
 
-> Pi-hole's DNS is on port 5354 instead of 53 to avoid conflicts with systemd-resolved. Pi-hole uses Unbound (172.20.0.2) as its upstream resolver for fully self-contained DNS
+> Pi-hole's DNS is on port 5354 instead of 53 to avoid conflicts with systemd-resolved. Pi-hole uses Quad9 (`9.9.9.9`) as its upstream DNS
 
 
 ## Usage
@@ -177,7 +174,7 @@ docker compose restart portainer
 docker compose logs -f
 
 # Single service
-docker compose logs -f unbound
+docker compose logs -f pihole
 ```
 
 
@@ -222,18 +219,18 @@ Then log in at `http://[YOUR-PI-IP]:8081/admin`
 ### Pi-hole not blocking ads
 
 1. Check Pi-hole's DNS settings: `http://[YOUR-PI-IP]:8081/admin/settings.php?tab=dns`
-2. Upstream should be `172.20.0.2#53` (Unbound)
+2. Upstream DNS should be Quad9 (`9.9.9.9`)
 3. Check the query log: `http://[YOUR-PI-IP]:8081/admin/query_log.php`
 4. Ensure your device is using `[YOUR-PI-IP]:5354` as its DNS server
 
 ## Security Considerations
 
 1. Change all default passwords in `.env`
-3. Portainer and Pi-hole use HTTP by default, consider a reverse proxy with HTTPS
-4. Keep your system updated: `sudo apt-get update && sudo apt-get upgrade`
-5. **Watchtower** has access to the Docker socket, giving it full control over all containers. This is normal for auto-update tools but means a compromise of the Watchtower container would compromise the whole host. Disable it if you don't need it: `docker compose stop watchtower`
-6. **Watchtower** updates containers automatically, be aware that updates could break things. Pin specific image tags in `docker-compose.yml` if you need stability
-7. **Tailscale** is more secure than opening ports to the internet. Your Pi is only accessible to devices in your Tailscale network
+2. Portainer and Pi-hole use HTTP by default, consider a reverse proxy with HTTPS
+3. Keep your system updated: `sudo apt-get update && sudo apt-get upgrade`
+4. **Watchtower** has access to the Docker socket, giving it full control over all containers. This is normal for auto-update tools but means a compromise of the Watchtower container would compromise the whole host. Disable it if you don't need it: `docker compose stop watchtower`
+5. **Watchtower** updates containers automatically, be aware that updates could break things. Pin specific image tags in `docker-compose.yml` if you need stability
+6. **Tailscale** is more secure than opening ports to the internet. Your Pi is only accessible to devices in your Tailscale network
 
 ## Backup
 
@@ -255,6 +252,6 @@ Based on [mineraleyt/pi2w-docker](https://github.com/mineraleyt/pi2w-docker).
 
 Changes made:
 - Removed **MariaDB** and **phpMyAdmin**
-- Added **Unbound** **Tailscale** and **FileBrowser**
+- Added **Tailscale** and **FileBrowser**
 - Switched **NGINX** to `stable-alpine-slim` for a smaller footprint
 
