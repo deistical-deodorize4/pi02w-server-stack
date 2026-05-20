@@ -95,7 +95,7 @@ services:
       FB_USERNAME: ${FB_USERNAME:-admin}
       FB_PASSWORD: ${FB_PASSWORD}
     entrypoint: /bin/sh
-    command: -c '/filebrowser users update "$${FB_USERNAME}" --password "$${FB_PASSWORD}" 2>/dev/null || true; exec /filebrowser'
+    command: -c '/bin/filebrowser users update "$${FB_USERNAME}" --password "$${FB_PASSWORD}" 2>/dev/null || true; exec /bin/filebrowser'
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:80/health"]
@@ -110,10 +110,10 @@ services:
     container_name: watchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    command: --schedule "0 0 4 * * *" --cleanup
+    command: --api-version 1.54 --schedule "0 0 4 * * *" --cleanup
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "/watchtower", "--health-check"]
+      test: ["CMD", "/watchtower", "--health-check", "--api-version", "1.54"]
       interval: 30s
       timeout: 10s
       retries: 3
