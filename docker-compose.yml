@@ -20,19 +20,17 @@ services:
   pihole:
     image: pihole/pihole:latest
     container_name: pihole
+    network_mode: host
     environment:
       TZ: ${PIHOLE_TZ:-Europe/Madrid}
       WEBPASSWORD: ${PIHOLE_WEBPASSWORD}
       DNSMASQ_LISTENING: all
       PIHOLE_DNS_1: 9.9.9.9
       PIHOLE_DNS_2: 149.112.112.112
+      FTLCONF_webserver_port: 8081
     volumes:
       - './pihole/etc-pihole:/etc/pihole'
       - './pihole/etc-dnsmasq.d:/etc/dnsmasq.d'
-    ports:
-      - "53:53/tcp"
-      - "53:53/udp"
-      - "8081:80/tcp"
     restart: unless-stopped
     cap_add:
       - NET_ADMIN
