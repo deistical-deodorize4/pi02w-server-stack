@@ -11,7 +11,7 @@ These are the services suggested, feel free to do as you will.
 - **NGINX**: Web server on port 80 (healthcheck: HTTP via `wget`)
 - **FileBrowser**: File manager on port 8080 (healthcheck: HTTP via `wget` on `/health`)
 - **Pi-hole**: Network-wide ad blocking (built-in healthcheck: DNS query via `dig`)
-- **Unbound**: Recursive DNS resolver (healthcheck: DNS resolution via `drill-hc` — Pi-hole won't start until Unbound is ready)
+- **Unbound**: Recursive DNS resolver (healthcheck: DNS resolution via `drill-hc` — Pi-hole won't start until Unbound is ready). Ships with DNSSEC in permissive mode — validates when possible, never blocks working DNS
 - **Tailscale**: Mesh VPN (healthcheck: HTTP via `wget` on the built-in `/healthz` endpoint)
 - **Watchtower**: Automatic container updates (healthcheck: built-in `--health-check` flag)
 
@@ -59,16 +59,6 @@ cp .env.default .env
 nano .env
 ```
 
-Set the following:
-
-| Variable | Description |
-|----------|-------------|
-| `PIHOLE_WEBPASSWORD` | Choose a password for the Pi-hole admin panel |
-| `PIHOLE_TZ` | Your timezone |
-| `TS_AUTH_KEY` | Your Tailscale auth key |
-| `FB_USERNAME` | FileBrowser login username (default: `admin`) |
-| `FB_PASSWORD` | FileBrowser login password |
-
 **Getting a Tailscale auth key:**
 1. Go to https://login.tailscale.com/admin/settings/keys
 2. Click **Generate auth key**
@@ -108,7 +98,7 @@ docker compose ps
 ### Check Portainer (first-time setup)
 
 Open `http://[YOUR-PI-IP]:9000` in your browser.
-1. Create an admin user (username and password)
+1. Create an admin user
 2. Select **Docker** as the environment type
 3. Connect to the local Docker socket
 
@@ -121,7 +111,7 @@ Open `http://[YOUR-PI-IP]:8081/admin`. Login with password set in `PIHOLE_WEBPAS
 To verify Unbound is working as the upstream DNS resolver:
 1. Go to **Settings > DNS**
 2. Under **Upstream DNS Servers**, you should see `172.20.0.2#53` (custom)
-3. Go to **Tools > Ping** and ping `google.com` — it should resolve
+3. Go to **Tools > Search Lists** and ping `google.com` . It should resolve
 
 
 ### Configure Tailscale
@@ -146,7 +136,7 @@ Pi-hole listens on **port 5354** (not the default port 53). To use it:
 
 **On a single device**: Set the DNS server to `[YOUR-PI-IP]:5354` in the device's network settings.
 
-**On your router (for whole network)**: Set the DNS server to `[YOUR-PI-IP]:5354` in the router's DHCP/DNS settings. Most routers allow custom DNS but not all support a custom port — if yours doesn't, you'll need to configure each device individually.
+**On your router (for whole network)**: Set the DNS server to `[YOUR-PI-IP]:5354` in the router's DHCP/DNS settings. Most routers allow custom DNS but not all support a custom port.
 
 
 ## Default Ports
@@ -161,29 +151,6 @@ Pi-hole listens on **port 5354** (not the default port 53). To use it:
 
 > Pi-hole's DNS is on port 5354 instead of 53 to avoid conflicts with systemd-resolved. Pi-hole uses Unbound (172.20.0.2) as its upstream resolver for fully self-contained DNS
 
-## Configuration
-
-### Environment Variables
-
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `PIHOLE_WEBPASSWORD` | Yes | — | Pi-hole admin password |
-| `PIHOLE_TZ` | No | `Europe/Madrid` | Timezone for Pi-hole |
-| `TS_AUTH_KEY` | No | — | Tailscale auth key (omit to skip auto-connect) |
-| `FB_USERNAME` | No | `admin` | FileBrowser login username |
-| `FB_PASSWORD` | Yes | — | FileBrowser login password |
-
-### Service Directories
-
-| Directory | Contents |
-|-----------|----------|
-| `nginx/html` | Web files served by NGINX |
-| `nginx/conf.d` | NGINX configuration files |
-| `pihole/etc-pihole` | Pi-hole data (blocklists, config, gravity) |
-| `pihole/etc-dnsmasq.d` | Pi-hole dnsmasq configuration |
-| `tailscale` | Tailscale state (auto-created) |
-| `files` | Files served by FileBrowser (put your files here) |
-| `filebrowser` | FileBrowser database |
 
 ## Usage
 
@@ -245,6 +212,13 @@ exec newgrp docker
 
 Or just log out and back in.
 
+### Wrong Pi-hole password
+If the password in `.env` isn't working:
+```bash
+docker compose exec pihole pihole setpassword
+```
+Then log in at `http://[YOUR-PI-IP]:8081/admin`
+
 ### Pi-hole not blocking ads
 
 1. Check Pi-hole's DNS settings: `http://[YOUR-PI-IP]:8081/admin/settings.php?tab=dns`
@@ -255,11 +229,11 @@ Or just log out and back in.
 ## Security Considerations
 
 1. Change all default passwords in `.env`
-3. Portainer and Pi-hole use HTTP by default — consider a reverse proxy with HTTPS
+3. Portainer and Pi-hole use HTTP by default, consider a reverse proxy with HTTPS
 4. Keep your system updated: `sudo apt-get update && sudo apt-get upgrade`
 5. **Watchtower** has access to the Docker socket, giving it full control over all containers. This is normal for auto-update tools but means a compromise of the Watchtower container would compromise the whole host. Disable it if you don't need it: `docker compose stop watchtower`
-6. **Watchtower** updates containers automatically — be aware that updates could break things. Pin specific image tags in `docker-compose.yml` if you need stability
-7. **Tailscale** is more secure than opening ports to the internet — no exposed ports needed on your router. Your Pi is only accessible to devices in your Tailscale network
+6. **Watchtower** updates containers automatically, be aware that updates could break things. Pin specific image tags in `docker-compose.yml` if you need stability
+7. **Tailscale** is more secure than opening ports to the internet. Your Pi is only accessible to devices in your Tailscale network
 
 ## Backup
 
