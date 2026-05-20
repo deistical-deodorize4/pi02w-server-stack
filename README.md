@@ -11,7 +11,7 @@ These are the services suggested, feel free to do as you will.
 - **NGINX**: Web server on port 80 (healthcheck: HTTP via `wget`)
 - **FileBrowser**: File manager on port 8080 (healthcheck: HTTP via `wget` on `/health`)
 - **Pi-hole**: Network-wide ad blocking (built-in healthcheck: DNS query via `dig`)
-- **Unbound**: Recursive DNS resolver (healthcheck: DNS resolution via `drill-hc` — Pi-hole won't start until Unbound is ready). Ships with DNSSEC in permissive mode — validates when possible, never blocks working DNS
+- **Unbound**: Recursive DNS resolver (healthcheck: DNS resolution via `drill-hc` — Pi-hole won't start until Unbound is ready). Does direct root server resolution — no upstream DNS dependency, no DNSSEC validation (keeps it simple and reliable)
 - **Tailscale**: Mesh VPN (healthcheck: HTTP via `wget` on the built-in `/healthz` endpoint)
 - **Watchtower**: Automatic container updates (healthcheck: built-in `--health-check` flag)
 
