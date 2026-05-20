@@ -1,6 +1,6 @@
 # Raspberry Pi Zero 2 W Docker Stack
 
-A complete Docker stack for Raspberry Pi Zero 2 W including web server, ad blocking, DNS resolver, mesh VPN, and management tools.
+A complete Docker stack for Raspberry Pi Zero 2 W including web server, ad blocking, mesh VPN, and management tools.
 
 ## Services
 
