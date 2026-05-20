@@ -7,14 +7,14 @@ services:
     ports:
       - "80:80"
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:80/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
     volumes:
       - ./nginx/html:/usr/share/nginx/html
+    mem_limit: 32m
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # Network-wide ad blocking
   pihole:
@@ -34,6 +34,12 @@ services:
     restart: unless-stopped
     cap_add:
       - NET_ADMIN
+    mem_limit: 256m
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # Mesh VPN
   tailscale:
@@ -41,12 +47,6 @@ services:
     container_name: tailscale
     restart: unless-stopped
     network_mode: host
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:9002/healthz"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
     environment:
       TS_AUTH_KEY: ${TS_AUTH_KEY:-}
       TS_STATE_DIR: /var/lib/tailscale
@@ -58,6 +58,12 @@ services:
     cap_add:
       - NET_ADMIN
       - NET_RAW
+    mem_limit: 48m
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # Docker management
   portainer:
@@ -67,15 +73,15 @@ services:
       - "9000:9000"
       - "8000:8000"
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "--no-check-certificate", "https://127.0.0.1:9443/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
+    mem_limit: 128m
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # File browser
   filebrowser:
@@ -96,27 +102,12 @@ services:
     entrypoint: /bin/sh
     command: -c '/filebrowser users update "$${FB_USERNAME}" --password "$${FB_PASSWORD}" 2>/dev/null || true; exec /filebrowser'
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:80/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 15s
-
-  # Automatic container updates
-  watchtower:
-    image: containrrr/watchtower
-    container_name: watchtower
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    command: --api-version 1.54 --schedule "0 0 4 * * *" --cleanup
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "/watchtower", "--health-check", "--api-version", "1.54"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
+    mem_limit: 64m
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   portainer_data:

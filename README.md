@@ -7,14 +7,13 @@ A complete Docker stack for Raspberry Pi Zero 2 W including web server, ad block
 These are the services suggested, feel free to do as you will.
 
 
-- **Portainer**: Docker container management UI (healthcheck: HTTPS via `wget`)
-- **NGINX**: Web server on port 80 (healthcheck: HTTP via `wget`)
-- **FileBrowser**: File manager on port 8080 (healthcheck: HTTP via `wget` on `/health`)
-- **Pi-hole**: Network-wide ad blocking (built-in healthcheck: DNS query via `dig`). Uses Quad9 (`9.9.9.9`) as upstream DNS
-- **Tailscale**: Mesh VPN (healthcheck: HTTP via `wget` on the built-in `/healthz` endpoint)
-- **Watchtower**: Automatic container updates (healthcheck: built-in `--health-check` flag)
+- **Pi-hole**: Network-wide ad blocking with Quad9 (`9.9.9.9`) upstream DNS
+- **Portainer**: Docker container management UI on port 9000
+- **NGINX**: Web server on port 80
+- **FileBrowser**: File manager on port 8080
+- **Tailscale**: Mesh VPN for secure remote access
 
-All services include healthchecks: `docker compose ps` shows their status as `healthy` or `unhealthy`.
+All services have memory limits and capped logging to keep the Pi running smoothly.
 
 ## Prerequisites
 
@@ -103,13 +102,32 @@ Open `http://[YOUR-PI-IP]:9000` in your browser.
 
 This is a one-time setup. After that, you can manage all containers from the Portainer UI.
 
-### Check Pi-hole
+### Verify Pi-hole is working
 
-Open `http://[YOUR-PI-IP]:8081/admin`. Login with password set in `PIHOLE_WEBPASSWORD`.
+1. **Check the container is running:**
+   ```bash
+   docker compose ps
+   ```
+   Should show `pihole` as `Up` (healthy).
 
-To verify Pi-hole is working:
-1. Check the dashboard for query statistics
-2. Go to **Tools > Ping** and ping `google.com` — it should resolve
+2. **Test DNS resolution from your PC:**
+   Set your device's DNS to `[YOUR-PI-IP]`, then:
+   ```bash
+   nslookup quad9.net [YOUR-PI-IP]
+   ```
+   Should return an IP (like `9.9.9.9`), not a timeout.
+
+3. **Check Pi-hole web admin:**
+   Open `http://[YOUR-PI-IP]:8081/admin`
+   - Login with password from `.env`
+   - Check the query log for recent queries from your devices
+   - Run a ping from **Tools > Ping** to verify resolution
+
+4. **Test that blocking works:**
+   ```bash
+   nslookup doubleclick.net [YOUR-PI-IP]
+   ```
+   Should return `0.0.0.0` (blocked).
 
 ### Configure Tailscale
 
@@ -180,10 +198,6 @@ docker compose logs -f pihole
 
 ### Updating containers
 
-Watchtower automatically updates all containers daily at 4:00 AM.
-
-For manual updates:
-
 ```bash
 docker compose pull
 docker compose up -d
@@ -191,11 +205,11 @@ docker compose up -d
 
 ## RAM Usage Note
 
-If the Pi feels slow or containers crash:
+This stack is designed to run on a Pi Zero 2 W (512MB RAM). The Pi sits at ~250MB used at idle. If it feels slow:
 
 - Check memory: `free -h`
-- If Watchtower isn't needed, stop it: `docker compose stop watchtower`
-- Consider disabling services you don't use
+- Check swap usage: `free -h`
+- Stop services you don't need
 
 ## Troubleshooting
 
@@ -242,9 +256,7 @@ Then restart Pi-hole: `docker compose up -d pihole`
 1. Change all default passwords in `.env`
 2. Portainer and Pi-hole use HTTP by default, consider a reverse proxy with HTTPS
 3. Keep your system updated: `sudo apt-get update && sudo apt-get upgrade`
-4. **Watchtower** has access to the Docker socket, giving it full control over all containers. This is normal for auto-update tools but means a compromise of the Watchtower container would compromise the whole host. Disable it if you don't need it: `docker compose stop watchtower`
-5. **Watchtower** updates containers automatically, be aware that updates could break things. Pin specific image tags in `docker-compose.yml` if you need stability
-6. **Tailscale** is more secure than opening ports to the internet. Your Pi is only accessible to devices in your Tailscale network
+4. **Tailscale** is more secure than opening ports to the internet. Your Pi is only accessible to devices in your Tailscale network
 
 ## Backup
 
@@ -266,6 +278,8 @@ Based on [mineraleyt/pi2w-docker](https://github.com/mineraleyt/pi2w-docker).
 
 Changes made:
 - Removed **MariaDB** and **phpMyAdmin**
+- Removed **Watchtower** (not suitable for low-memory SBCs)
 - Added **Tailscale** and **FileBrowser**
 - Switched **NGINX** to `stable-alpine-slim` for a smaller footprint
+- All services have memory limits and capped logging
 
