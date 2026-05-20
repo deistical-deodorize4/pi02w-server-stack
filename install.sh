@@ -89,6 +89,11 @@ sudo systemctl enable docker
 echo "Adding user to docker group..."
 sudo usermod -aG docker $USER
 
+# Reduce swappiness to minimize SD card wear (zram handles swap)
+echo "Setting vm.swappiness=10..."
+echo "vm.swappiness=10" | sudo tee /etc/sysctl.d/99-swappiness.conf
+sudo sysctl -w vm.swappiness=10 > /dev/null
+
 echo "Installation complete!"
 echo "Please log out and log back in for docker group changes to take effect"
 echo "Then run 'docker compose up -d' to start all services."
