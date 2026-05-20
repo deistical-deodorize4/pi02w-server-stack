@@ -96,4 +96,4 @@ IP=$(hostname -I | awk '{print $1}')
 echo "Access Portainer at http://$IP:9000"
 echo "Access Pi-hole admin at http://$IP:8081/admin"
 echo "Access FileBrowser at http://$IP:8080"
-echo "Pi-hole DNS is on port 5354 (configure devices to use $IP:5354 as DNS server)"
+echo "Pi-hole DNS is on port 53 (configure devices to use $IP as DNS server)"

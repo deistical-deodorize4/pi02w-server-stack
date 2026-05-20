@@ -129,11 +129,11 @@ docker compose exec tailscale tailscale login
 
 ### Configure devices to use Pi-hole for ad blocking
 
-Pi-hole listens on **port 5354** (not the default port 53). To use it:
+Pi-hole uses the standard DNS port **53**. To use it:
 
-**On a single device**: Set the DNS server to `[YOUR-PI-IP]:5354` in the device's network settings.
+**On a single device**: Set the DNS server to `[YOUR-PI-IP]` in the device's network settings.
 
-**On your router (for whole network)**: Set the DNS server to `[YOUR-PI-IP]:5354` in the router's DHCP/DNS settings. Most routers allow custom DNS but not all support a custom port.
+**On your router (for whole network)**: Set the DNS server to `[YOUR-PI-IP]` in the router's DHCP/DNS settings.
 
 
 ## Default Ports
@@ -141,12 +141,12 @@ Pi-hole listens on **port 5354** (not the default port 53). To use it:
 | Service | Port | Purpose |
 |---------|------|---------|
 | NGINX | `80` | Web server |
-| Pi-hole | `5354` | DNS (mapped from container port 53) |
+| Pi-hole | `53` | DNS |
 | Pi-hole | `8081` | Admin web interface |
 | Portainer | `9000` | Management UI |
 | FileBrowser | `8080` | File manager |
 
-> Pi-hole's DNS is on port 5354 instead of 53 to avoid conflicts with systemd-resolved. Pi-hole uses Quad9 (`9.9.9.9`) as its upstream DNS
+> Pi-hole uses Quad9 (`9.9.9.9`) as its upstream DNS for privacy
 
 
 ## Usage
@@ -221,7 +221,21 @@ Then log in at `http://[YOUR-PI-IP]:8081/admin`
 1. Check Pi-hole's DNS settings: `http://[YOUR-PI-IP]:8081/admin/settings.php?tab=dns`
 2. Upstream DNS should be Quad9 (`9.9.9.9`)
 3. Check the query log: `http://[YOUR-PI-IP]:8081/admin/query_log.php`
-4. Ensure your device is using `[YOUR-PI-IP]:5354` as its DNS server
+4. Ensure your device is using `[YOUR-PI-IP]` as its DNS server
+
+### Pi-hole fails to start — port 53 already in use
+
+This means `systemd-resolved` (or another service) is already using port 53 on your system. Pi-hole needs port 53 for DNS.
+
+To fix it:
+
+```bash
+sudo systemctl disable --now systemd-resolved
+sudo rm /etc/resolv.conf
+sudo ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
+```
+
+Then restart Pi-hole: `docker compose up -d pihole`
 
 ## Security Considerations
 

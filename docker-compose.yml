@@ -23,14 +23,15 @@ services:
     environment:
       TZ: ${PIHOLE_TZ:-Europe/Madrid}
       WEBPASSWORD: ${PIHOLE_WEBPASSWORD}
+      DNSMASQ_LISTENING: all
       PIHOLE_DNS_1: 9.9.9.9
       PIHOLE_DNS_2: 149.112.112.112
     volumes:
       - './pihole/etc-pihole:/etc/pihole'
       - './pihole/etc-dnsmasq.d:/etc/dnsmasq.d'
     ports:
-      - "5354:53/tcp"
-      - "5354:53/udp"
+      - "53:53/tcp"
+      - "53:53/udp"
       - "8081:80/tcp"
     restart: unless-stopped
     cap_add:
