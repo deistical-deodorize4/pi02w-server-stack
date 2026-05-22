@@ -2,9 +2,7 @@
 
 A complete Docker stack for Raspberry Pi Zero 2 W including web server, ad blocking, mesh VPN, and management tools.
 
-![image alt](<img src="https://github.com/deistical-deodorize4/pi02w-server-stack/blob/469fbfdfa83ddc06c6ea58991e342797bf6650a7/visuals.jpg)" 
-     style="filter: brightness(0.8) contrast(0.9);" 
-     alt="image alt">)
+![image alt](https://github.com/deistical-deodorize4/pi02w-server-stack/blob/469fbfdfa83ddc06c6ea58991e342797bf6650a7/visuals.jpg)
 
 ## Services
 
